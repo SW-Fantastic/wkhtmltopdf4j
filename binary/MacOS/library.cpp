@@ -24,7 +24,7 @@ jstring asJavaString(JNIEnv* env, const char* pat){
     //将char* 转换为byte数组
     (env)->SetByteArrayRegion(bytes, 0, (jsize)strlen(pat), (jbyte*)pat);
     //设置String, 保存语言类型,用于byte数组转换至String时的参数
-    jstring encoding = (env)->NewStringUTF("GB2312");
+    jstring encoding = (env)->NewStringUTF("UTF8");
     //将byte数组转换为java String,并输出
     return (jstring)(env)->NewObject(strClass, ctorID, bytes, encoding);
 }
