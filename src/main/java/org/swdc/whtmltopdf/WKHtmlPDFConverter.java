@@ -9,13 +9,21 @@ import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.*;
 
 public class WKHtmlPDFConverter {
+
+	private static ExecutorService executor = new ThreadPoolExecutor(1,1,0, TimeUnit.DAYS,new LinkedBlockingQueue<>());
 
 	private WKMessageListener msg;
 	
 	private WKProcessListener progress;
-	
+
+	public WKHtmlPDFConverter() {
+	}
+
 	public void setOnMesssage(WKMessageListener msg) {
 		this.msg = msg;
 	}
@@ -30,30 +38,40 @@ public class WKHtmlPDFConverter {
 			OutputStream out = Files.newOutputStream(tempFile);
 			out.write(source.getBytes(StandardCharsets.UTF_8));
 			out.close();
+
 			File result = convert(tempFile.toFile(), target);
 			Files.delete(tempFile);
 			return result;
+
 		} catch (Exception e) {
 			throw new RuntimeException("Faild to convert string",e);
 		}
 	}
 	
 	public File convert(File source, File target) {
-		try {
-			String path = "file:///" + source.getAbsolutePath();
-			String dist = target.getAbsolutePath();
-			if(target.exists()) {
-				target.delete();
+			try {
+				return executor.submit(() -> {
+					synchronized (WKHtmlPDFConverter.class) {
+						try {
+							String path = "file:///" + source.getAbsolutePath();
+							String dist = target.getAbsolutePath();
+							if(target.exists()) {
+								target.delete();
+							}
+							generatePDF(path, dist);
+							File file = new File(dist);
+							if(file.exists()) {
+								return file;
+							}
+							return null;
+						} catch (Exception e) {
+							throw new RuntimeException("Can not open source file",e);
+						}
+					}
+				}).get();
+			} catch (Exception e) {
+				throw new RuntimeException(e);
 			}
-			generatePDF(path, dist);
-			File file = new File(dist);
-			if(file.exists()) {
-				return file;
-			}
-			return null;
-		} catch (Exception e) {
-			throw new RuntimeException("Can not open source file",e);
-		}
 	}
 	
 	private void onMessage(String errMessage) {
@@ -69,6 +87,10 @@ public class WKHtmlPDFConverter {
 	}
 	
 	public native void generatePDF(String absolutePath,String outputPath);
-	
-	
+
+
+	public static void close() {
+		executor.shutdown();
+	}
+
 }

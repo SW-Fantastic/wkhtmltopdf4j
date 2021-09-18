@@ -6,6 +6,12 @@
 
 
 JavaVM* javaVm;
+
+// 这里的本地代码，通过java来保证它会运行在同一个转换任务里面，
+// 不会出现同时转换多个文件的情况，java同样保证本组件会运行在同一个线程上面，
+// 在同一个线程执行转换任务，以避免“QObject::startTimer: Timers cannot be started from another thread”
+// 和类似的异常。
+
 jobject javaInstance;
 
 jstring asJavaString(JNIEnv* env, const char* pat){
@@ -123,9 +129,7 @@ void warning(wkhtmltopdf_converter* c, const char* msg){
 JNIEXPORT void JNICALL Java_org_swdc_whtmltopdf_WKHtmlPDFConverter_generatePDF
   (JNIEnv * jenv, jobject self, jstring source, jstring dist) {
 
-    if (javaInstance == NULL){
-        javaInstance = self;
-    }
+    javaInstance = self;
 
 	wkhtmltopdf_global_settings* gs;
 	wkhtmltopdf_object_settings* os;

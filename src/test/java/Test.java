@@ -11,14 +11,22 @@ public class Test {
 		loader.load(new File("dist/WKHtmlPDF.xml"));
 
 		WKHtmlPDFConverter conv = new WKHtmlPDFConverter();
+		WKHtmlPDFConverter conv2 = new WKHtmlPDFConverter();
 		conv.setOnProgress(i -> {
 			System.err.println("Progress is " + i);
 		});
 		conv.setOnMesssage(e -> {
 			System.err.println("Message : " + e);;
 		});
-		conv.convert(new File("test.html"), new File("test.pdf"));
-		conv.convert("<h1>Hello</h1>", new File("Demo.pdf"));
+
+		new Thread(() -> {
+			conv.convert(new File("test.html"), new File("test.pdf"));
+		}).start();
+
+		new Thread(() -> {
+			conv2.convert("<h1>Hello</h1>", new File("Demo.pdf"));
+		}).start();
+
 	}
 	
 }

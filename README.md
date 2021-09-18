@@ -45,3 +45,57 @@ public class Test {
 	
 }
 ```
+
+## 如何构建
+
+native类库位于binary内部，如果需要从源码构建，请按照如下方法进行：
+
+### Mac OS 
+
+安装XCode，以及make，gcc，g++等编译器。
+
+进入binary/MacOS文件夹，执行如下命令。
+```bash
+make -f Makefile library
+```
+
+### windows 
+
+首先安装MinGW 64，然后将MinGW的bin目录放在系统的环境变量Path中。
+
+进入binary/windows文件夹，执行make.bat
+```bash
+./make
+```
+
+## How to build
+
+native c++ source code in the binary folder。
+
+### Mac OS
+
+open the native/Mac OS，and run the makefile ：
+```bash 
+make -f Makefile library
+```
+
+### windows
+open the native/windows and run make.bat
+```bash
+make
+```
+
+## 局限
+本组件只能单线程转换PDF，一个一个的被HTML或者String的执行转换，不能多线程同时操作，因此效率比较有限，
+这是因为Qt的渲染只能在Qt的ApplicationThread运行。
+
+由于使用了线程池，所以在关闭应用的时候需要显式的使用`System.exit`，或者
+调用`WKHtmlPDFConverter.close`
+
+## limitation
+the wrapper working on a single thread，because render operation must be call on
+Qt Application thread。
+
+thread pool used in WKHtmlPDFConverter, 
+please call `System.exit`, or `WKHtmlPDFConverter.close` when 
+you want to exit the application
