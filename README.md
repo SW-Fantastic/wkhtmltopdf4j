@@ -5,13 +5,7 @@
 这个是WkHtmltoPDF的wrapper，本wrapper通过java的jni技术编写，
 不需要使用命令行，不需要额外的安装。
 
-使用之前，请首先clone [我的StandAlone工程组](https://github.com/SW-Fantastic/standalone)，
-并且在本地的maven中安装libloader工程。
-
-下面是加载本地类库以及Wrapper的使用的例子。
-
-
-## English
+本项目通过CMake进行编译，需要WkhtmltoPDF的类库。
 
 this is a wrapper of WhtmlToPDF native library with java jni.
 
@@ -48,54 +42,29 @@ public class Test {
 
 ## 如何构建
 
-native类库位于binary内部，如果需要从源码构建，请按照如下方法进行：
+构建本项目前，请在Release中下载WKHtmlToPDF的动态链接库，并将
+它们解压到dependencies目录内，否则构建将会失败。
 
-### Mac OS 
+目前本项目使用CMake，您可以使用CMake在Windows或者MacOS构建此项目，
+通常来说，如果您已经安装了CMake并且把它配置在系统的环境变量——Path中，
+那么通过以下指令就能够构建此项目：
 
-安装XCode，以及make，gcc，g++等编译器。
-
-进入binary/MacOS文件夹，执行如下命令。
 ```bash
-make -f Makefile library
-```
-
-### windows 
-
-首先安装MinGW 64，然后将MinGW的bin目录放在系统的环境变量Path中。
-
-进入binary/windows文件夹，执行make.bat
-```bash
-./make
-```
-
-## How to build
-
-native c++ source code in the binary folder。
-
-### Mac OS
-
-open the native/Mac OS，and run the makefile ：
-```bash 
-make -f Makefile library
-```
-
-### windows
-open the native/windows and run make.bat
-```bash
+mkdir ./Build
+cd Build
+cmake ..
+# 接下来要做的事情取决于你使用的构建系统。
+# 如果生成的是Makefile，那么只需要执行此命令即可
 make
 ```
+
+Windows系统需要在MSYS2进行构建，MacOS系统需要您安装XCode，至少是XCode的构建工具。
+
 
 ## 局限
 本组件只能单线程转换PDF，一个一个的被HTML或者String的执行转换，不能多线程同时操作，因此效率比较有限，
 这是因为Qt的渲染只能在Qt的ApplicationThread运行。
 
-由于使用了线程池，所以在关闭应用的时候需要显式的使用`System.exit`，或者
-调用`WKHtmlPDFConverter.close`
-
 ## limitation
 the wrapper working on a single thread，because render operation must be call on
 Qt Application thread。
-
-thread pool used in WKHtmlPDFConverter, 
-please call `System.exit`, or `WKHtmlPDFConverter.close` when 
-you want to exit the application
